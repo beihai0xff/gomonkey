@@ -3,11 +3,13 @@ package gomonkey
 import "syscall"
 
 func modifyBinary(target uintptr, bytes []byte) {
+	var err error
 	function := entryAddress(target, len(bytes))
-	err := mprotectCrossPage(target, len(bytes), syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
-	if err != nil {
+
+	if err = mprotectCrossPage(target, len(bytes), syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC); err != nil {
 		panic(err)
 	}
+
 	copy(function, bytes)
 	err = mprotectCrossPage(target, len(bytes), syscall.PROT_READ|syscall.PROT_EXEC)
 	if err != nil {
